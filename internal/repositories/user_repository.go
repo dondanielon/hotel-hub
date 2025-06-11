@@ -41,13 +41,13 @@ func (ur *UserRepository) Insert(ctx context.Context, user *models.User) (*model
 	return user, nil
 }
 
-func (ur *UserRepository) GetByID(ctx context.Context, id string) (*User, error) {
+func (ur *UserRepository) GetByID(ctx context.Context, id string) (*models.User, error) {
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
 	}
 
-	var user User
+	var user models.User
 	err = ur.collection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -60,8 +60,8 @@ func (ur *UserRepository) GetByID(ctx context.Context, id string) (*User, error)
 	return &user, nil
 }
 
-func (ur *UserRepository) GetByUsername(ctx context.Context, username string) (*User, error) {
-	var user User
+func (ur *UserRepository) GetByUsername(ctx context.Context, username string) (*models.User, error) {
+	var user models.User
 	err := ur.collection.FindOne(ctx, bson.M{"username": username}).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -74,8 +74,8 @@ func (ur *UserRepository) GetByUsername(ctx context.Context, username string) (*
 	return &user, nil
 }
 
-func (ur *UserRepository) GetByEmail(ctx context.Context, email string) (*User, error) {
-	var user User
+func (ur *UserRepository) GetByEmail(ctx context.Context, email string) (*models.User, error) {
+	var user models.User
 	err := ur.collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -88,7 +88,7 @@ func (ur *UserRepository) GetByEmail(ctx context.Context, email string) (*User, 
 	return &user, nil
 }
 
-func (ur *UserRepository) Find(ctx context.Context) ([]*User, error) {
+func (ur *UserRepository) Find(ctx context.Context) ([]*models.User, error) {
 	cursor, err := ur.collection.Find(ctx, bson.M{})
 	if err != nil {
 		ur.logger.Printf("Error finding users: %v", err)
@@ -96,9 +96,9 @@ func (ur *UserRepository) Find(ctx context.Context) ([]*User, error) {
 	}
 	defer cursor.Close(ctx)
 
-	var users []*User
+	var users []*models.User
 	for cursor.Next(ctx) {
-		var user User
+		var user models.User
 		if err := cursor.Decode(&user); err != nil {
 			ur.logger.Printf("Error decoding user: %v", err)
 			continue
@@ -114,7 +114,7 @@ func (ur *UserRepository) Find(ctx context.Context) ([]*User, error) {
 	return users, nil
 }
 
-func (ur *UserRepository) Update(ctx context.Context, id string, user *User) (*User, error) {
+func (ur *UserRepository) Update(ctx context.Context, id string, user *models.User) (*models.User, error) {
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
