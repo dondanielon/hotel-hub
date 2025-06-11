@@ -58,14 +58,14 @@ go run cmd/main.go
 ## Project Structure
 
 ```
-.
 ├── cmd/
-│   └── main.go     # Application entry point
+│   └── main.go          # Application entry point
 ├── internal/
-│   ├── database/   # Database models and repositories
-│   ├── game/       # Game NET code
-│   ├── v1/         # HTTP API REST version 1
-├── pkg/            # Shared packages
-├── scripts/        # Utility scripts
-└── go.mod          # Go modules file
+│   ├── database/        # Database configurations and connections
+│   ├── repositories/    # Data access layer
+│   ├── models/          # Data models and entities
+│   ├── v1/              # API version 1 handlers and routes
+│   └── game/            # Game logic and mechanics
+├── go.mod               # Go modules file
+├── go.sum               # Go modules checksums
 ```
