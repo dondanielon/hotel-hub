@@ -62,13 +62,9 @@ go run cmd/main.go
 ├── cmd/
 │   └── main.go     # Application entry point
 ├── internal/
-│   ├── config/     # Configuration
-│   ├── handler/    # HTTP handlers
-│   ├── middleware/ # HTTP middleware
-│   ├── model/      # Database models
-│   ├── repository/ # Data access layer
-│   ├── service/    # Business logic
-│   └── websocket/  # WebSocket handlers
+│   ├── database/   # Database models and repositories
+│   ├── game/       # Game NET code
+│   ├── v1/         # HTTP API REST version 1
 ├── pkg/            # Shared packages
 ├── scripts/        # Utility scripts
 └── go.mod          # Go modules file
