@@ -1,6 +1,7 @@
 package main
 
 import (
+	"ais-summoner/internal/database"
 	"ais-summoner/internal/game"
 	"context"
 	"log"
@@ -11,13 +12,19 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
 	logger := log.New(os.Stdout, "[AIS-Summoners] ", log.LstdFlags)
 	logger.Println("Starting AIS Summoners server...")
 
-	gameGateway := game.CreateGameGateway()
+	err := godotenv.Load()
+	if err != nil {
+		logger.Fatalf("Error loading .env file: %v", err)
+	}
+
+	gameGateway := game.CreateGameGateway(database.NewMongoDB())
 	go gameGateway.Run()
 
 	router := gin.Default()
@@ -41,7 +48,7 @@ func main() {
 		gameGateway.HandleWebSocketConnection(ginCtx.Writer, ginCtx.Request)
 	})
 
-	port := "8080"
+	port := os.Getenv("PORT")
 	server := &http.Server{
 		Addr:    ":" + port,
 		Handler: router,
