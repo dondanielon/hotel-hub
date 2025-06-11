@@ -1,6 +1,7 @@
-package database
+package repositories
 
 import (
+	"ais-summoner/internal/models"
 	"context"
 	"log"
 	"time"
@@ -22,7 +23,7 @@ func NewUserRepository(db *mongo.Database) *UserRepository {
 	}
 }
 
-func (ur *UserRepository) Insert(ctx context.Context, user *User) (*User, error) {
+func (ur *UserRepository) Insert(ctx context.Context, user *models.User) (*models.User, error) {
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
 

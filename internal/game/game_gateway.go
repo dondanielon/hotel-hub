@@ -1,6 +1,8 @@
 package game
 
 import (
+	"ais-summoner/internal/database"
+
 	"log"
 	"net/http"
 	"sync"
@@ -10,16 +12,18 @@ import (
 
 type GameGateway struct {
 	clients    map[*GameClient]bool
+	mongodb    *database.MongoDB
 	logger     *log.Logger
-	upgrader   websocket.Upgrader
 	mutex      sync.RWMutex
 	register   chan *GameClient
 	unregister chan *GameClient
+	upgrader   websocket.Upgrader
 }
 
-func CreateGameGateway() *GameGateway {
+func CreateGameGateway(mongodb *database.MongoDB) *GameGateway {
 	return &GameGateway{
 		clients: make(map[*GameClient]bool),
+		mongodb: mongodb,
 		logger:  log.New(log.Writer(), "[GameGateway] ", log.LstdFlags),
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {

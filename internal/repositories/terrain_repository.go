@@ -1,6 +1,7 @@
-package database
+package repositories
 
 import (
+	"ais-summoner/internal/models"
 	"context"
 	"log"
 	"time"
@@ -22,7 +23,7 @@ func NewTerrainRepository(db *mongo.Database) *TerrainRepository {
 	}
 }
 
-func (tr *TerrainRepository) Insert(ctx context.Context, terrain *Terrain) (*Terrain, error) {
+func (tr *TerrainRepository) Insert(ctx context.Context, terrain *models.Terrain) (*models.Terrain, error) {
 	terrain.CreatedAt = time.Now()
 	terrain.UpdatedAt = time.Now()
 
@@ -36,13 +37,13 @@ func (tr *TerrainRepository) Insert(ctx context.Context, terrain *Terrain) (*Ter
 	return terrain, nil
 }
 
-func (tr *TerrainRepository) GetByID(ctx context.Context, id string) (*Terrain, error) {
+func (tr *TerrainRepository) GetByID(ctx context.Context, id string) (*models.Terrain, error) {
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
 	}
 
-	var terrain Terrain
+	var terrain models.Terrain
 	err = tr.collection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&terrain)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -55,7 +56,7 @@ func (tr *TerrainRepository) GetByID(ctx context.Context, id string) (*Terrain, 
 	return &terrain, nil
 }
 
-func (tr *TerrainRepository) Find(ctx context.Context) ([]*Terrain, error) {
+func (tr *TerrainRepository) Find(ctx context.Context) ([]*models.Terrain, error) {
 	cursor, err := tr.collection.Find(ctx, bson.M{})
 	if err != nil {
 		tr.logger.Printf("Error finding terrains: %v", err)
@@ -63,9 +64,9 @@ func (tr *TerrainRepository) Find(ctx context.Context) ([]*Terrain, error) {
 	}
 	defer cursor.Close(ctx)
 
-	var terrains []*Terrain
+	var terrains []*models.Terrain
 	for cursor.Next(ctx) {
-		var terrain Terrain
+		var terrain models.Terrain
 		if err := cursor.Decode(&terrain); err != nil {
 			tr.logger.Printf("Error decoding terrain: %v", err)
 			continue
@@ -81,7 +82,7 @@ func (tr *TerrainRepository) Find(ctx context.Context) ([]*Terrain, error) {
 	return terrains, nil
 }
 
-func (tr *TerrainRepository) Update(ctx context.Context, id string, terrain *Terrain) (*Terrain, error) {
+func (tr *TerrainRepository) Update(ctx context.Context, id string, terrain *models.Terrain) (*models.Terrain, error) {
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
