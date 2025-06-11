@@ -37,9 +37,7 @@ func main() {
 	router.GET("/health", func(ginCtx *gin.Context) {})
 	router.GET("/ws", func(ginCtx *gin.Context) {
 		cookies := ginCtx.Request.Cookies()
-		headers := ginCtx.Request.Header.Values("x-custom")
 		logger.Printf("Cookies: %+v", cookies)
-		logger.Printf("Headers: %+v", headers[0])
 		gameGateway.HandleWebSocketConnection(ginCtx.Writer, ginCtx.Request)
 	})
 
