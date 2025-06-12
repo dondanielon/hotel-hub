@@ -6,10 +6,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type UserMetadata struct {
-	ModelID string `json:"modelId" bson:"modelId"`
-}
-
 type User struct {
 	ID        primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 	Username  string             `json:"username" bson:"username"`
