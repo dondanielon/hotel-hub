@@ -3,7 +3,10 @@ package main
 import (
 	"ais-summoner/internal/database"
 	"ais-summoner/internal/game"
+	"ais-summoner/internal/pkg/authenticator"
+	"ais-summoner/internal/router"
 	"context"
+	"encoding/gob"
 	"log"
 	"net/http"
 	"os"
@@ -11,6 +14,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -24,11 +29,16 @@ func main() {
 		logger.Fatalf("Error loading .env file: %v", err)
 	}
 
+	auth, err := authenticator.New()
+	if err != nil {
+		log.Fatalf("Failed to initialize the authenticator: %v", err)
+	}
+
 	gameGateway := game.CreateGameGateway(database.NewMongoDB())
 	go gameGateway.Run()
 
-	router := gin.Default()
-	router.Use(func(ginCtx *gin.Context) {
+	rtr := gin.Default()
+	rtr.Use(func(ginCtx *gin.Context) {
 		ginCtx.Header("Access-Control-Allow-Origin", "*")
 		ginCtx.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		ginCtx.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
@@ -41,17 +51,23 @@ func main() {
 		ginCtx.Next()
 	})
 
-	router.GET("/health", func(ginCtx *gin.Context) {})
-	router.GET("/ws", func(ginCtx *gin.Context) {
+	gob.Register(map[string]interface{}{})
+	store := cookie.NewStore([]byte(os.Getenv("SESSION_SECRET")))
+	rtr.Use(sessions.Sessions("auth-session", store))
+
+	rtr.GET("/health", func(ginCtx *gin.Context) {})
+	rtr.GET("/ws", func(ginCtx *gin.Context) {
 		cookies := ginCtx.Request.Cookies()
 		logger.Printf("Cookies: %+v", cookies)
 		gameGateway.HandleWebSocketConnection(ginCtx.Writer, ginCtx.Request)
 	})
 
+	router.NewAuthV1Router(rtr, auth)
+
 	port := os.Getenv("PORT")
 	server := &http.Server{
 		Addr:    ":" + port,
-		Handler: router,
+		Handler: rtr,
 	}
 
 	// Start server in a goroutine
