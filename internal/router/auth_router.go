@@ -8,9 +8,9 @@ import (
 )
 
 func NewAuthV1Router(router *gin.Engine, auth *authenticator.Authenticator) {
-	routerPrefix := "v1/auth"
+	pathPrefix := "v1/auth"
 
-	router.GET(routerPrefix+"/login", handler.LoginHandler(auth))
-	router.GET(routerPrefix+"/logout", handler.LogoutHandler)
-	router.GET(routerPrefix+"/callback", handler.CallbackHandler(auth))
+	router.GET(pathPrefix+"/login", handler.LoginHandler(auth))
+	router.GET(pathPrefix+"/logout", handler.LogoutHandler)
+	router.GET(pathPrefix+"/callback", handler.CallbackHandler(auth))
 }
