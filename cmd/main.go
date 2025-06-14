@@ -23,22 +23,16 @@ import (
 func main() {
 	logger := log.New(os.Stdout, "[AIS-Summoners] ", log.LstdFlags)
 	logger.Println("Starting AIS Summoners server...")
+	loadEnvVariables(logger)
 
-	err := godotenv.Load()
-	if err != nil {
-		logger.Fatalf("Error loading .env file: %v", err)
-	}
+	gateway := game.NewGameGateway(database.NewMongoDB(), database.NewRedis())
+	go gateway.Run()
 
-	auth, err := authenticator.New()
-	if err != nil {
-		log.Fatalf("Failed to initialize the authenticator: %v", err)
-	}
+	gob.Register(map[string]interface{}{})
+	store := cookie.NewStore([]byte(os.Getenv("SESSION_SECRET")))
 
-	gameGateway := game.CreateGameGateway(database.NewMongoDB())
-	go gameGateway.Run()
-
-	rtr := gin.Default()
-	rtr.Use(func(ginCtx *gin.Context) {
+	ginRouter := gin.Default()
+	ginRouter.Use(func(ginCtx *gin.Context) {
 		ginCtx.Header("Access-Control-Allow-Origin", "*")
 		ginCtx.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		ginCtx.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
@@ -50,24 +44,26 @@ func main() {
 
 		ginCtx.Next()
 	})
-
-	gob.Register(map[string]interface{}{})
-	store := cookie.NewStore([]byte(os.Getenv("SESSION_SECRET")))
-	rtr.Use(sessions.Sessions("auth-session", store))
-
-	rtr.GET("/health", func(ginCtx *gin.Context) {})
-	rtr.GET("/ws", func(ginCtx *gin.Context) {
-		cookies := ginCtx.Request.Cookies()
-		logger.Printf("Cookies: %+v", cookies)
-		gameGateway.HandleWebSocketConnection(ginCtx.Writer, ginCtx.Request)
+	ginRouter.Use(sessions.Sessions("auth-session", store))
+	ginRouter.GET("/health", func(ginCtx *gin.Context) {})
+	ginRouter.GET("/version", func(ginCtx *gin.Context) {})
+	ginRouter.GET("/ws", func(ginCtx *gin.Context) {
+		gateway.HandleWebSocketConnection(ginCtx.Writer, ginCtx.Request)
 	})
 
-	router.NewAuthV1Router(rtr, auth)
+	auth, err := authenticator.NewAuthenticator()
+	if err != nil {
+		log.Fatalf("Failed to initialize the authenticator: %v", err)
+	}
+
+	router.NewAuthRouterV1(ginRouter, auth)
+	router.NewUserRouterV1(ginRouter)
+	router.NewTerrainRouterV1(ginRouter)
 
 	port := os.Getenv("PORT")
 	server := &http.Server{
 		Addr:    ":" + port,
-		Handler: rtr,
+		Handler: ginRouter,
 	}
 
 	// Start server in a goroutine
@@ -79,6 +75,13 @@ func main() {
 	}()
 
 	handleShutdown(server, logger)
+}
+
+func loadEnvVariables(logger *log.Logger) {
+	err := godotenv.Load()
+	if err != nil {
+		logger.Fatalf("Error loading .env file: %v", err)
+	}
 }
 
 func handleShutdown(server *http.Server, logger *log.Logger) {

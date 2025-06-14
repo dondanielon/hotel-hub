@@ -15,16 +15,18 @@ type GameGateway struct {
 	mongodb    *database.MongoDB
 	logger     *log.Logger
 	mutex      sync.RWMutex
+	redis      *database.Redis
 	register   chan *GameClient
 	unregister chan *GameClient
 	upgrader   websocket.Upgrader
 }
 
-func CreateGameGateway(mongodb *database.MongoDB) *GameGateway {
+func NewGameGateway(mongodb *database.MongoDB, cache *database.Redis) *GameGateway {
 	return &GameGateway{
 		clients: make(map[*GameClient]bool),
 		mongodb: mongodb,
 		logger:  log.New(log.Writer(), "[GameGateway] ", log.LstdFlags),
+		redis:   cache,
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
 				return true

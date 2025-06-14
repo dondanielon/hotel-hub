@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewAuthV1Router(router *gin.Engine, auth *authenticator.Authenticator) {
+func NewAuthRouterV1(router *gin.Engine, auth *authenticator.Authenticator) {
 	pathPrefix := "v1/auth"
 
 	router.GET(pathPrefix+"/login", handler.LoginHandler(auth))
