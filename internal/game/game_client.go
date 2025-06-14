@@ -43,25 +43,6 @@ func (client *GameClient) Read() {
 	}
 }
 
-/**
-* Write es un método que maneja la escritura de mensajes a través de una conexión WebSocket.
-* Este método se ejecuta en un bucle infinito y tiene dos responsabilidades principales:
-*
-* 1. Enviar mensajes al cliente:
-*   - Escucha mensajes en el canal 'send' del cliente
-*   - Cuando recibe un mensaje, establece un tiempo límite de 10 segundos para escribir
-*   - Si el canal está cerrado, envía un mensaje de cierre y termina
-*   - Escribe el mensaje actual y cualquier mensaje en cola en la conexión WebSocket
-*
-* 2. Mantener la conexión viva:
-*   - Utiliza un temporizador (ticker) que se activa cada 54 segundos
-*   - Cuando el temporizador se activa, envía un mensaje "ping" al cliente
-*   - Esto evita que la conexión se cierre por inactividad
-*
-* El método incluye manejo de errores y limpieza de recursos:
-* - Si ocurre cualquier error al escribir, el método termina
-* - Cuando el método termina, detiene el temporizador y cierra la conexión
-**/
 func (client *GameClient) Write() {
 	ticker := time.NewTicker(54 * time.Second)
 	defer func() {
