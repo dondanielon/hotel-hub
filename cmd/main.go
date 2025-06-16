@@ -45,7 +45,11 @@ func main() {
 		ginCtx.Next()
 	})
 	ginRouter.Use(sessions.Sessions("auth-session", store))
-	ginRouter.GET("/health", func(ginCtx *gin.Context) {})
+	ginRouter.GET("/health", func(ginCtx *gin.Context) {
+		session := sessions.Default(ginCtx)
+		log.Printf("profile: %v", session.Get("profile"))
+		log.Printf("access_token: %v", session.Get("access_token"))
+	})
 	ginRouter.GET("/version", func(ginCtx *gin.Context) {})
 	ginRouter.GET("/ws", func(ginCtx *gin.Context) {
 		gateway.HandleWebSocketConnection(ginCtx.Writer, ginCtx.Request)

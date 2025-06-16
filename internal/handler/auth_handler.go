@@ -4,6 +4,7 @@ import (
 	"ais-summoner/internal/pkg/authenticator"
 	"crypto/rand"
 	"encoding/base64"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -28,6 +29,7 @@ func LoginHandler(auth *authenticator.Authenticator) gin.HandlerFunc {
 			return
 		}
 
+		log.Printf("temporary redirect: %v", auth.AuthCodeURL(state))
 		ctx.Redirect(http.StatusTemporaryRedirect, auth.AuthCodeURL(state))
 	}
 }
