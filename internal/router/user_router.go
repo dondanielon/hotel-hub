@@ -1,6 +1,14 @@
 package router
 
-import "github.com/gin-gonic/gin"
+import (
+	"ais-summoner/internal/database"
+	"ais-summoner/internal/handler"
 
-func NewUserRouterV1(router *gin.Engine) {
+	"github.com/gin-gonic/gin"
+)
+
+func NewUserRouterV1(router *gin.Engine, mongodb *database.MongoDB) {
+	pathPrefix := "/v1/user"
+
+	router.GET(pathPrefix+"/:id", handler.GetUserByIdHandler(mongodb))
 }

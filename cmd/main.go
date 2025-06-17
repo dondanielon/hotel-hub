@@ -25,7 +25,8 @@ func main() {
 	logger.Println("Starting AIS Summoners server...")
 	loadEnvVariables(logger)
 
-	gateway := game.NewGameGateway(database.NewMongoDB(), database.NewRedis())
+	mongodb := database.NewMongoDB()
+	gateway := game.NewGameGateway(mongodb, database.NewRedis())
 	go gateway.Run()
 
 	gob.Register(map[string]interface{}{})
@@ -61,7 +62,7 @@ func main() {
 	}
 
 	router.NewAuthRouterV1(ginRouter, auth)
-	router.NewUserRouterV1(ginRouter)
+	router.NewUserRouterV1(ginRouter, mongodb)
 	router.NewTerrainRouterV1(ginRouter)
 
 	port := os.Getenv("PORT")
