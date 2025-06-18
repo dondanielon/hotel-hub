@@ -63,7 +63,7 @@ func main() {
 
 	router.NewAuthRouterV1(ginRouter, auth)
 	router.NewUserRouterV1(ginRouter, mongodb)
-	router.NewTerrainRouterV1(ginRouter)
+	router.NewTerrainRouterV1(ginRouter, mongodb)
 
 	port := os.Getenv("PORT")
 	server := &http.Server{
