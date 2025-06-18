@@ -2,10 +2,15 @@ package handler
 
 import (
 	"ais-summoner/internal/database"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 func GetUserByIdHandler(mongo *database.MongoDB) gin.HandlerFunc {
-	return func(ctx *gin.Context) {}
+	return func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, gin.H{
+			"id": ctx.Param("id"),
+		})
+	}
 }
