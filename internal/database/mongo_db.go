@@ -25,10 +25,8 @@ func NewMongoDB() *MongoDB {
 	if err != nil {
 		logger.Fatalf("Failed to connect to MongoDB: %v", err)
 	}
-	defer client.Disconnect(context.Background())
 
 	logger.Println("Connected to MongoDB successfully")
-
 	db := client.Database(os.Getenv("MONGODB_DATABASE"))
 
 	return &MongoDB{
@@ -38,4 +36,17 @@ func NewMongoDB() *MongoDB {
 		terrainRepo: repositories.NewTerrainRepository(db),
 		userRepo:    repositories.NewUserRepository(db),
 	}
+}
+
+func (m *MongoDB) UserRepository() *repositories.UserRepository {
+	return m.userRepo
+}
+
+func (m *MongoDB) TerrainRepository() *repositories.TerrainRepository {
+	return m.terrainRepo
+}
+
+func (m *MongoDB) Close() error {
+	m.logger.Println("Disconnecting from MongoDB")
+	return m.client.Disconnect(context.Background())
 }
