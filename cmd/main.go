@@ -79,7 +79,7 @@ func main() {
 		}
 	}()
 
-	handleShutdown(server, logger)
+	handleShutdown(server, mongodb, logger)
 }
 
 func loadEnvVariables(logger *log.Logger) {
@@ -89,7 +89,7 @@ func loadEnvVariables(logger *log.Logger) {
 	}
 }
 
-func handleShutdown(server *http.Server, logger *log.Logger) {
+func handleShutdown(server *http.Server, mongodb *database.MongoDB, logger *log.Logger) {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
@@ -98,6 +98,11 @@ func handleShutdown(server *http.Server, logger *log.Logger) {
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
+
+	// Close MongoDB connection
+	if err := mongodb.Close(); err != nil {
+		logger.Printf("Error closing MongoDB connection: %v", err)
+	}
 
 	if err := server.Shutdown(shutdownCtx); err != nil {
 		logger.Fatalf("Server forced to shutdown: %v", err)
