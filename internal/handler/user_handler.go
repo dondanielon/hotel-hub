@@ -9,8 +9,12 @@ import (
 
 func GetUserByIdHandler(mongo *database.MongoDB) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, gin.H{
-			"id": ctx.Param("id"),
-		})
+		user, err := mongo.UserRepository().GetByID(ctx, ctx.Param("id"))
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, user)
 	}
 }
