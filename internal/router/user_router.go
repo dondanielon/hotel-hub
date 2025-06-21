@@ -11,4 +11,5 @@ func NewUserRouterV1(router *gin.Engine, mongodb *database.MongoDB) {
 	pathPrefix := "/v1/user"
 
 	router.GET(pathPrefix+"/:id", handler.GetUserByIdHandler(mongodb))
+	router.GET(pathPrefix+"/:email", handler.GetUserByEmailHandler(mongodb))
 }

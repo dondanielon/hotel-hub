@@ -18,3 +18,15 @@ func GetUserByIdHandler(mongo *database.MongoDB) gin.HandlerFunc {
 		ctx.JSON(http.StatusOK, user)
 	}
 }
+
+func GetUserByEmailHandler(mongo *database.MongoDB) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		user, err := mongo.UserRepository().GetByEmail(ctx, ctx.Param("email"))
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, user)
+	}
+}
