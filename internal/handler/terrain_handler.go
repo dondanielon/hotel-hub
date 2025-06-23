@@ -18,3 +18,15 @@ func GetTerrainByIdHandler(mongodb *database.MongoDB) gin.HandlerFunc {
 		ctx.JSON(http.StatusOK, terrain)
 	}
 }
+
+func GetTerrainListHandler(mongodb *database.MongoDB) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		terrain, err := mongodb.TerrainRepository().Find(ctx)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, terrain)
+	}
+}
